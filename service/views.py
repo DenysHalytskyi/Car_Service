@@ -1,5 +1,6 @@
 from rest_framework import viewsets
 from .models import Customer, Vehicle, Part, Service, ServiceOrder, UsedPart
+from django_filters.rest_framework import DjangoFilterBackend
 from .serializers import (
     CustomerSerializer, VehicleSerializer, PartSerializer,
     ServiceSerializer, ServiceOrderSerializer, UsedPartSerializer
@@ -9,6 +10,8 @@ from .serializers import (
 class CustomerViewSet(viewsets.ModelViewSet):
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['last_name', 'phone_number']
 
 
 class VehicleViewSet(viewsets.ModelViewSet):
