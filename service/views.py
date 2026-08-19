@@ -72,3 +72,22 @@ class ServiceOrderViewSet(viewsets.ModelViewSet):
 class UsedPartViewSet(viewsets.ModelViewSet):
     queryset = UsedPart.objects.all()
     serializer_class = UsedPartSerializer
+
+    def perform_create(self, serializer):
+        used_part = serializer.save()
+        # decrement
+        used_part.part.stock_quantity -= used_part.quantity
+        used_part.part.save()
+
+    def perform_update(self, serializer):
+        old_quantity = self.get_object().quantity
+        used_part = serializer.save()
+        diff = used_part.quantity - old_quantity
+        used_part.part.stock_quantity -= diff
+        used_part.part.save()
+
+    def perform_destroy(self, instance):
+        # return spare
+        instance.part.stock_quantity += instance.quantity
+        instance.part.save()
+        instance.delete()

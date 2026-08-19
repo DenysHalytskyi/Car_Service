@@ -30,6 +30,24 @@ class UsedPartSerializer(serializers.ModelSerializer):
         model = UsedPart
         fields = '__all__'
 
+    def validate(self, attrs):
+        part = attrs.get('part')
+        quantity = attrs.get('quantity', 1)
+
+        if self.instance:
+            diff = quantity - self.instance.quantity
+            if part.stock_quantity < diff:
+                raise serializers.ValidationError(
+                    {"quantity": f"Brak wystarczającej ilości w magazynie. Dostępno: {part.stock_quantity}"}
+                )
+        else:
+            if part.stock_quantity < quantity:
+                raise serializers.ValidationError(
+                    {"quantity": f"Brak wystarczającej ilości w magazynie. Dostępno: {part.stock_quantity}"}
+                )
+
+        return attrs
+
 
 class ServiceOrderSerializer(serializers.ModelSerializer):
     class Meta:
