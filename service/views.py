@@ -1,9 +1,11 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from django.db.models import Sum, F
 from .models import Customer, Vehicle, Part, Service, ServiceOrder, UsedPart
 from django_filters.rest_framework import DjangoFilterBackend
+from django.utils import timezone
 from .serializers import (
     CustomerSerializer, VehicleSerializer, PartSerializer,
     ServiceSerializer, ServiceOrderSerializer, UsedPartSerializer
@@ -91,3 +93,24 @@ class UsedPartViewSet(viewsets.ModelViewSet):
         instance.part.stock_quantity += instance.quantity
         instance.part.save()
         instance.delete()
+
+
+class DashboardStatsView(APIView):
+
+    def get(self, request):
+        in_progress_count = ServiceOrder.objects.filter(status=ServiceOrder.OrderStatus.IN_PROGRESS).count()
+
+        completed_orders = ServiceOrder.objects.filter(status=ServiceOrder.OrderStatus.COMPLETED)
+        completed_count = completed_orders.count()
+
+        total_revenue = 0
+        for order in completed_orders:
+            services_cost = sum(service.price for service in order.services.all())
+            parts_cost = sum(up.quantity * up.part.price for up in order.used_parts.all())
+            total_revenue += (services_cost + parts_cost)
+
+        return Response({
+            'in_progress_orders': in_progress_count,
+            'completed_orders': completed_count,
+            'total_revenue': total_revenue
+        }, status=status.HTTP_200_OK)

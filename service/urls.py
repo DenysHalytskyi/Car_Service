@@ -2,7 +2,8 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
     CustomerViewSet, VehicleViewSet, PartViewSet,
-    ServiceViewSet, ServiceOrderViewSet, UsedPartViewSet
+    ServiceViewSet, ServiceOrderViewSet, UsedPartViewSet,
+    DashboardStatsView
 )
 
 
@@ -15,5 +16,6 @@ router.register(r'orders', ServiceOrderViewSet)
 router.register(r'used-parts', UsedPartViewSet)
 
 urlpatterns = [
+    path('dashboard/', DashboardStatsView.as_view(), name='dashboard-stats'),
     path('', include(router.urls)),
 ]
