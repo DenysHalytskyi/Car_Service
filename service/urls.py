@@ -1,0 +1,21 @@
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import (
+    CustomerViewSet, VehicleViewSet, PartViewSet,
+    ServiceViewSet, ServiceOrderViewSet, UsedPartViewSet,
+    DashboardStatsView
+)
+
+
+router = DefaultRouter()
+router.register(r'customers', CustomerViewSet)
+router.register(r'vehicles', VehicleViewSet)
+router.register(r'parts', PartViewSet)
+router.register(r'services', ServiceViewSet)
+router.register(r'orders', ServiceOrderViewSet)
+router.register(r'used-parts', UsedPartViewSet)
+
+urlpatterns = [
+    path('dashboard/', DashboardStatsView.as_view(), name='dashboard-stats'),
+    path('', include(router.urls)),
+]
